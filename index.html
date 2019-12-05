@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Ziqi Xiao, Yaxuan Zhang, Weiming Chen, Zheng li" />
+
+
+<title>Machine Learning Project – Reproducing paper ‘Towards Evaluating the Robustness of Neural Networks’</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Machine Learning Project – Reproducing paper ‘Towards Evaluating the Robustness of Neural Networks’</h1>
+<h4 class="author">Ziqi Xiao, Yaxuan Zhang, Weiming Chen, Zheng li</h4>
+<h4 class="date">12/4/2019</h4>
+
+</div>
+
+
+<div id="results-from-the-original-paper-and-discussion-to-the-relevent-papers" class="section level2">
+<h2>Results from the original paper and discussion to the relevent papers</h2>
+<p>In this paper, the author introduce three new attack algorthms by using three previously defined distance metrics (<span class="math inline">\(L_0, L_2, L_{\infty}\)</span>) and you may find what it looks like in Fig. 1. The shining point of these three new attacks is they are immuned from the defensive distillation, which is a recent defense proposed for hardening neural networks against adversarial examples. In other words, by applying these three new attacks. the denfensive distillation does not imporve the robustness of neural networks. as a result, the defensive distillation does not completely get rid of the adversarial examples. Maybe it can defense the algorithm from the previously published attacks, but it can not prevent the compromise from other more powerful attacks methods (for example, the method they used in this paper).</p>
+<div class="figure">
+<img src="L_example.png" alt="Figure 1" />
+<p class="caption">Figure 1</p>
+</div>
+<p>From the works the author have done in this paper, the needs for better technique is demanding to evaluate the robustness of neural networks. Authors have shown that compared with the results without distillation (shown in Table 1), the introduction of distillation (shown in Table 2) did not add much help. Attacks under distance metrics of <span class="math inline">\(L_0\)</span> and <span class="math inline">\(L_2\)</span> perform a little bit worse. The mean distortion for <span class="math inline">\(L_0\)</span> increase from 8.5 to 10. The mean distortion for <span class="math inline">\(L_2\)</span> increase from 1.36 to 1.7. <span class="math inline">\(L_\infty\)</span> attack change can be neglected, which it increase from 0.13 to 0.14. And importantly, all of their attacks succeed with 100% success. This is considered as the first break to the distillation.</p>
+<div class="figure">
+<img src="without_dis.png" alt="Table 1" />
+<p class="caption">Table 1</p>
+</div>
+<div class="figure">
+<img src="with_dis.png" alt="Table 2" />
+<p class="caption">Table 2</p>
+</div>
+<p>Authors also found that the temperature settings for the distillation does not affect the attack success rate. In the original work of Papernot (IEEE,2016), they mentioned that the increase of the distillation temperature can result in reducing attack success rate. For example, the success rate can be as high as 91% when T=1 and it will decrease to 0.5% when T=100. However, authors in this work show that by applying their attacks, the temperature won’t affect the success rate of the attacks. They also do experiments for their attacks and results is shown in Fig. 2.</p>
+<div class="figure">
+<img src="temp.png" alt="Figure 2" style="width:50.0%" />
+<p class="caption">Figure 2</p>
+</div>
+<p>Other researchers (Goodfellow (arXic 2014), Papernot (arXic 2016), Szegedy (ICLR 2013)) have shown that an adversarial example for one model have high possibility transfer to be an adversarial on a different model, although they are based one different training data sets or different algorithm. For example, adversarial examples on neural networks can transfer to random forests. So the authors of this work come up with the high-confidence adversarial examples to break this transferability. The results can be found in Fig. 3. As we can see from Fig. 3, the transferability success rate are different in (a) and (b), where (a) is previous approach (only require k=20 to reach 100%) while (b) is current approach (require k=40 to reach 100%). This is consider as the second break to the distillation.</p>
+<div class="figure">
+<img src="before_after.png" alt="Figure 3" />
+<p class="caption">Figure 3</p>
+</div>
+</div>
+<div id="neural-networks-model-construction" class="section level2">
+<h2>Neural networks model construction</h2>
+<p>Before generate attack to the samples, we first train our MINIST datasets with both natural neural networks and distillation one. With tensor flow package, we use the momentum-based SGD algorithm to realize the optimization. ReLu activation function has been used because of its popularity. The architecture we use show in table below, the learning rate is 0.1, momentum is 0.9 and dropout is 0.5 with 128 batch size and 50 epochs. For defensive distillation part, we first train the data with normal neural networks for one epoch to get a relatively good starting point, then we train the teacher model at specific temperature which is 10 here. The soft labels will be evaluated next at this temperature, the final step is to predict the labels at 1 temperature. Our calculation results show the accuracy of normal neural networks is around 99.4% which is very consistent with paper’s result (99.5%). Accuracy for distillation model is about 99.2% which is lower than the normal one, indicating that for specific datasets, those soft label may lower the accuracy because of the confidence problem.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Layer type</th>
+<th>MNIST model</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Convolution+ReLu</td>
+<td>3×3×32</td>
+</tr>
+<tr class="even">
+<td>Convolution+ReLu</td>
+<td>3×3×32</td>
+</tr>
+<tr class="odd">
+<td>Max Pooling</td>
+<td>2×2</td>
+</tr>
+<tr class="even">
+<td>Convolution+ReLu</td>
+<td>3×3×64</td>
+</tr>
+<tr class="odd">
+<td>Convolution+ReLu</td>
+<td>3×3×64</td>
+</tr>
+<tr class="even">
+<td>Max Pooling</td>
+<td>2×2</td>
+</tr>
+<tr class="odd">
+<td>Fully connecte+ ReLu</td>
+<td>200</td>
+</tr>
+<tr class="even">
+<td>Fully connecte+ ReLu</td>
+<td>200</td>
+</tr>
+<tr class="odd">
+<td>Softmax</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<p>Table 3</p>
+</div>
+<div id="attack-generation" class="section level2">
+<h2>Attack Generation</h2>
+<p>Adversarial example generation can be simply defined by the equation below:</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;Minimize \, D(x,x+\delta)\\
+&amp;To \; make \; C(x+\delta) = t \; \; \; x+\delta \in [0,1]^n \\
+\end{aligned}
+\]</span> Since <span class="math inline">\(C(x+\delta) = t\)</span> constrain term is non-linear, we prefer using object function term <span class="math inline">\(f(x+\delta)=0\)</span> to substitute former constrain. Like Euler-Lagrange equation, we can rearrange the equation by combining the constrain into target function, we can get:</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;Minimize \, D(x,x+\delta) + c * f(x+\delta)\\
+&amp;To \; make \;  x+\delta \in [0,1]^n \\
+\end{aligned}
+\]</span></p>
+<p>One thing needs to be mentioned that this work does not take integrality constrain problem into consideration, real pixel should be discrete integer but here we use round method to make ith pixel equal to <span class="math inline">\(255(x_i+δ_i)\)</span>.</p>
+<p>For ensuring the image is valid, box constrain should be applied which means we must set <span class="math inline">\(0≤x_i+δ_i≤1\)</span>, in this work we use the variable substitution method which is introducing an extra variable and optimize it instead previous <span class="math inline">\(x_i\)</span>.</p>
+<p><span class="math display">\[
+δ_i=1/2 (tanha(w_i )+1)-x_i
+\]</span></p>
+<p>Range of tanh function is between -1 and 1 which can just make <span class="math inline">\(0≤x_i+δ_i≤1\)</span>.</p>
+<p>We can combine the previous method together to generate <span class="math inline">\(L_2\)</span> attack first, which can be: Minimize <span class="math inline">\(||1/2 (tanha(w)+1)+x)||_2^2+c∙f(1/2 (tanha(w)+1)\)</span>)</p>
+<p>f is defined as:</p>
+<p><span class="math display">\[
+f(x^{&#39;}) = max (max \left\{Z(x^{&#39;}):i \neq t  \right\}- Z(x^{&#39;})_t - \kappa )
+\]</span><br />
+Which is the objective function we mention before. Here we simply set <span class="math inline">\(κ=0\)</span>.</p>
+<p>Generating <span class="math inline">\(L_0\)</span> attack is tricky since its distance metric is non-differentiable. So, in our calculation we will define some unimportant points first to make them immobile in each iteration and try to find the minimum number of pixels which can produce the adversarial examples. Actually, in every iteration we apply <span class="math inline">\(L_2\)</span> attack first into an allowed dataset and compute the objective function gradient <span class="math inline">\(g=∇f(x+δ)\)</span>. Then we find the minimum index of i of <span class="math inline">\(g_i∙δ_i\)</span> and remove ith pixel from the dataset we choose. The constant c value (in <span class="math inline">\(L_2\)</span> equation) is also important, so we start from a small number, if it fails to generate an adversarial example, we double it until it will achieve goal. For visualization the attack, we simulate 10 examples with 9 batch size and choose 4 examples with 3 batch as representation to show here, we only implement <span class="math inline">\(L_0\)</span> and <span class="math inline">\(L_2\)</span> attack in our model and results show in Fig.4.</p>
+<div class="figure">
+<img src="fig4.png" alt="Figure 4 (a) L_0 attack on MNIST data (b) L_2 attack on MNIST data" />
+<p class="caption">Figure 4 (a) L_0 attack on MNIST data (b) L_2 attack on MNIST data</p>
+</div>
+<p>The results show that <span class="math inline">\(L_2\)</span> attack is much harder to distinguish from original sample, but <span class="math inline">\(L_0\)</span> attack is very obvious (especially for 7 and 1 here). The results accord with the paper ones which indicates the implication of <span class="math inline">\(L_0\)</span> can be much more difficult than <span class="math inline">\(L_2\)</span>. Since we mentioned that <span class="math inline">\(L_0\)</span> metric is non-differentiable. This result can be reasonable cause we add <span class="math inline">\(L_2\)</span> attack first and revise the dataset which can be equivalent to further attack the data. We also calculate the mean distortion which defined as the summation of the pixel moving distance after the attack, the results show in Table 4. We calculate the mean distortion for two attacks in both normal and distilled neural network models. Due to the computation limitation. We only choose limited sample to get those results, the <span class="math inline">\(L_2\)</span> results accord with the paper ones. The trend for <span class="math inline">\(L_0\)</span> is the same as paper one since the mean value for distilled model is higher but the magnitude has large difference. One possible reason is that we should use much larger sample size to avoid numeric error.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Work</th>
+<th>Normal <span class="math inline">\(L_0\)</span></th>
+<th>Distilled <span class="math inline">\(L_0\)</span></th>
+<th>Normal <span class="math inline">\(L_2\)</span></th>
+<th>Distilled <span class="math inline">\(L_2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Our work</td>
+<td>4.286</td>
+<td>5.167</td>
+<td>1.830</td>
+<td>2.095</td>
+</tr>
+<tr class="even">
+<td>Literature work</td>
+<td>16</td>
+<td>19</td>
+<td>1.76</td>
+<td>2.2</td>
+</tr>
+</tbody>
+</table>
+<p>Table 4</p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>This work mainly focuses on reproducing the attack models and applying them to both natural and distilled neural network models. For the training part we found the accuracy for both neural network models are almost identical (over 99%), distillation model has a relatively lower value (difference is quite small) which mainly due to the confidential problem of the soft labels. The attack results indicate that <span class="math inline">\(L_2\)</span> attack is much harder to visualize which can make it a better choice when compared with <span class="math inline">\(L_0\)</span> since the different between adversarial example and original one is distinct. The non-differentiable nature of <span class="math inline">\(L_0\)</span> attack make it harder to realize and rely on the <span class="math inline">\(L_2\)</span> attack. Unfortunately, the mean distortion for <span class="math inline">\(L_0\)</span> is quite away from the literature result, which mainly because of the insufficient example we have used, but the trend is similar. <span class="math inline">\(L_2\)</span> is well accord with the paper’s result. Those works show that these attack is pretty strong and even defensive distillation model cannot overcome it.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

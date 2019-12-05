@@ -1,0 +1,13 @@
+name: "our-website"
+navbar:
+  title: "Machine Learning"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+      
+output:
+  html_document:
+    theme: cosmo
+    highlight: textmate

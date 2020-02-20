@@ -1,6 +1,6 @@
 ---
 title: "Machine Learning Project -- Reproducing paper 'Towards Evaluating the Robustness of Neural Networks'"
-author: "Ziqi Xiao, Yaxuan Zhang, Weiming Chen, Zheng li"
+author: "Yaxuan Zhang, Ziqi Xiao, Weiming Chen, Zheng li"
 date: "12/4/2019"
 output: html_document
 ---
